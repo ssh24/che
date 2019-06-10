@@ -11,6 +11,7 @@
  */
 'use strict';
 import {CheWorkspace} from '../../../../components/api/workspace/che-workspace.factory';
+import {CheBranding} from '../../../../components/branding/che-branding.factory';
 import {WorkspacesService} from '../../workspaces.service';
 
 /**
@@ -21,16 +22,22 @@ import {WorkspacesService} from '../../workspaces.service';
  */
 export class WorkspaceItemCtrl {
 
-  static $inject = ['$location', 'lodash', 'cheWorkspace', 'workspacesService'];
+  static $inject = ['$location', 'lodash', 'cheWorkspace', 'workspacesService', '$timeout', '$document', 'cheBranding', '$sce'];
 
   $location: ng.ILocationService;
   lodash: any;
   cheWorkspace: CheWorkspace;
   workspacesService: WorkspacesService;
+  $document: ng.IDocumentService;
+  $timeout: ng.ITimeoutService;
 
   workspace: che.IWorkspace;
   workspaceName: string;
-  workspaceSupportIssues = '';
+  workspaceSupportIssues: any;
+
+  private supportedRecipeTypeIsshue: any;
+  private supportedVersionTypeIsshue: any;
+  private timeoutPromise: ng.IPromise<any>;
 
   /**
    * Default constructor that is using resource
@@ -38,12 +45,24 @@ export class WorkspaceItemCtrl {
   constructor($location: ng.ILocationService,
               lodash: any,
               cheWorkspace: CheWorkspace,
-              workspacesService: WorkspacesService) {
+              workspacesService: WorkspacesService,
+              $timeout: ng.ITimeoutService,
+              $document: ng.IDocumentService,
+              cheBranding: CheBranding,
+              $sce: ng.ISCEService) {
     this.$location = $location;
     this.lodash = lodash;
     this.cheWorkspace = cheWorkspace;
     this.workspacesService = workspacesService;
+    this.$timeout = $timeout;
+    this.$document = $document;
     this.workspaceName = this.cheWorkspace.getWorkspaceDataManager().getName(this.workspace);
+
+    this.supportedRecipeTypeIsshue = $sce.trustAsHtml('Current infrastructure doesn\'t support this workspace recipe type.');
+
+    this.supportedVersionTypeIsshue = $sce.trustAsHtml(`This workspace is using old definition format which is not compatible anymore. 
+          Please follow the <a href="${cheBranding.getDocs().workspace}" target="_blank">documentation</a>
+          to update the definition of the workspace and benefits from the latest capabilities.`);
   }
 
   /**
@@ -53,18 +72,19 @@ export class WorkspaceItemCtrl {
    */
   get isSupported(): boolean {
     if (!this.workspacesService.isSupportedRecipeType(this.workspace)) {
-      this.workspaceSupportIssues = 'Current infrastructure doesn\'t support this workspace recipe type.';
+      if (this.workspaceSupportIssues !== this.supportedRecipeTypeIsshue) {
+        this.workspaceSupportIssues = this.supportedRecipeTypeIsshue;
+      }
 
       return false;
-    }
-    if (!this.workspacesService.isSupportedVersion(this.workspace)) {
-      this.workspaceSupportIssues = `This workspace is using old definition format which is not compatible anymore. 
-          Please follow the documentation to update the definition of the workspace and benefits from the latest capabilities.`;
+    } else if (!this.workspacesService.isSupportedVersion(this.workspace)) {
+      if (this.workspaceSupportIssues !== this.supportedVersionTypeIsshue) {
+        this.workspaceSupportIssues = this.supportedVersionTypeIsshue;
+      }
 
       return false;
-    }
-    if (!this.workspaceSupportIssues) {
-      this.workspaceSupportIssues = '';
+    } else if (!this.workspaceSupportIssues) {
+      this.workspaceSupportIssues = undefined;
     }
 
     return true;
@@ -103,6 +123,29 @@ export class WorkspaceItemCtrl {
     }
 
     return '-';
+  }
+
+  setTemporaryFocus(blurTimeout: number, elementId?: string): void {
+    const id = elementId ? elementId : `${this.workspace.id}-item-error`;
+    const targetElement = this.$document.find(`#${id}`);
+    if (!targetElement) {
+      return;
+    }
+    targetElement.focus();
+
+    this.resetBlurTimeout();
+    if (!blurTimeout) {
+       return;
+    }
+    this.timeoutPromise = this.$timeout(() => {
+      targetElement.blur();
+    }, blurTimeout);
+  }
+
+  resetBlurTimeout(): void {
+    if (this.timeoutPromise) {
+      this.$timeout.cancel(this.timeoutPromise);
+    }
   }
 
   /**
