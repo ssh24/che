@@ -121,9 +121,9 @@ export class LoadFactoryController {
         }
 
         // check factory contains compatible workspace config:
-        if (!this.factory.workspace || !this.isSupportedVersion()) {
+        if (!(Boolean(this.factory.workspace) !== Boolean(this.factory.devfile)) || !this.isSupportedVersion()) {
           this.getLoadingSteps()[this.getCurrentProgressStep()].hasError = true;
-          this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Factory has no compatible workspace config.';
+          this.getLoadingSteps()[this.getCurrentProgressStep()].logs = 'Factory has no compatible workspace config or devfile.';
         } else {
           this.loadFactoryService.goToNextStep();
           this.$timeout(() => {
@@ -272,20 +272,35 @@ export class LoadFactoryController {
    * Create workspace from factory config.
    */
   createWorkspace(): any {
-    let config = this.factory.workspace;
-    // set factory attribute:
-    let attrs = {factoryId: this.factory.id};
-    config.name = this.getWorkspaceName(config.name);
+    if (this.factory.workspace) {
+      let config = this.factory.workspace;
+      // set factory attribute:
+      let attrs = {factoryId: this.factory.id};
+      config.name = this.getWorkspaceName(config.name);
 
-    // todo: fix account when ready:
-    let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, config, attrs);
-    creationPromise.then((data: any) => {
-      this.$timeout(() => {
-        this.startWorkspace(data);
-      }, 1000);
-    }, (error: any) => {
-      this.handleError(error);
-    });
+      // todo: fix account when ready:
+      let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromConfig(null, config, attrs);
+      creationPromise.then((data: any) => {
+        this.$timeout(() => {
+          this.startWorkspace(data);
+        }, 1000);
+      }, (error: any) => {
+        this.handleError(error);
+      });
+    } else if (this.factory.devfile) {
+      let devfile = this.factory.devfile;
+      // set factory attribute:
+      let attrs = {factoryId: this.factory.id};
+
+      let creationPromise = this.cheAPI.getWorkspace().createWorkspaceFromDevfile(null, devfile, attrs);
+      creationPromise.then((data: any) => {
+        this.$timeout(() => {
+          this.startWorkspace(data);
+        }, 1000);
+      }, (error: any) => {
+        this.handleError(error);
+      });
+    }
   }
 
   /**

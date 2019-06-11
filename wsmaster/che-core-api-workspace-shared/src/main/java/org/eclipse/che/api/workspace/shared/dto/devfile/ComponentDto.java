@@ -99,11 +99,11 @@ public interface ComponentDto extends Component {
   ComponentDto withMemoryLimit(String memoryLimit);
 
   @Override
-  boolean getMountSources();
+  Boolean getMountSources();
 
-  void setMountSources(boolean mountSources);
+  void setMountSources(Boolean mountSources);
 
-  ComponentDto withMountSources(boolean mountSources);
+  ComponentDto withMountSources(Boolean mountSources);
 
   @Override
   List<String> getCommand();

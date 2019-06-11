@@ -28,6 +28,7 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
+import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentResolver;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.exception.WorkspaceExportException;
@@ -52,19 +53,22 @@ public class DevfileManager {
   private final DevfileIntegrityValidator integrityValidator;
   private final DevfileConverter devfileConverter;
   private final WorkspaceManager workspaceManager;
+  private final ComponentResolver componentResolver;
 
   @Inject
   public DevfileManager(
       DevfileSchemaValidator schemaValidator,
       DevfileIntegrityValidator integrityValidator,
       DevfileConverter devfileConverter,
-      WorkspaceManager workspaceManager) {
+      WorkspaceManager workspaceManager,
+      ComponentResolver componentResolver) {
     this(
         schemaValidator,
         integrityValidator,
         devfileConverter,
         workspaceManager,
-        new ObjectMapper(new YAMLFactory()));
+        new ObjectMapper(new YAMLFactory()),
+        componentResolver);
   }
 
   @VisibleForTesting
@@ -73,12 +77,14 @@ public class DevfileManager {
       DevfileIntegrityValidator integrityValidator,
       DevfileConverter devfileConverter,
       WorkspaceManager workspaceManager,
-      ObjectMapper objectMapper) {
+      ObjectMapper objectMapper,
+      ComponentResolver componentResolver) {
     this.schemaValidator = schemaValidator;
     this.integrityValidator = integrityValidator;
     this.devfileConverter = devfileConverter;
     this.workspaceManager = workspaceManager;
     this.objectMapper = objectMapper;
+    this.componentResolver = componentResolver;
   }
 
   /**
@@ -105,6 +111,17 @@ public class DevfileManager {
    */
   public DevfileImpl parseJson(String devfileContent) throws DevfileFormatException {
     return parse(devfileContent, schemaValidator::validateJson);
+  }
+
+  /**
+   * Resolve devfiles components
+   *
+   * @param devfile
+   * @param fileContentProvider
+   * @return Devfile object with resolved components
+   */
+  public DevfileImpl resolve(DevfileImpl devfile, FileContentProvider fileContentProvider) {
+    return devfile;
   }
 
   private DevfileImpl parse(String content, ValidationFunction validationFunction)

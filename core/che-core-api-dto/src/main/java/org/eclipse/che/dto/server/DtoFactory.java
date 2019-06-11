@@ -105,8 +105,8 @@ public final class DtoFactory {
   private final Gson dtoGson =
       buildDtoParser(
           ServiceLoader.load(TypeAdapterFactory.class).iterator(),
-          new NullAsEmptyTAF<>(Collection.class, Collections.emptyList()),
-          new NullAsEmptyTAF<>(Map.class, Collections.emptyMap()),
+//          new NullAsEmptyTAF<>(Collection.class, Collections.emptyList()),
+//          new NullAsEmptyTAF<>(Map.class, Collections.emptyMap()),
           new DtoInterfaceTAF());
 
   /**

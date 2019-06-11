@@ -139,6 +139,11 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.eclipse.che.infrastructure</groupId>
+            <artifactId>infrastructure-kubernetes</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.eclipse.che.multiuser</groupId>
             <artifactId>che-multiuser-api-authorization</artifactId>
             <scope>test</scope>
