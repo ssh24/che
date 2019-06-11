@@ -2,4 +2,5 @@
 --reporter 'dist/driver/CheReporter.js'
 -u tdd 
 --bail
---spec dist/tests/*.spec.js
+--full-trace
+--spec dist/tests/e2e/*.spec.js

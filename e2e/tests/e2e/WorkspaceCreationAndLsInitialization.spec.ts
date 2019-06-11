@@ -8,22 +8,23 @@
  * SPDX-License-Identifier: EPL-2.0
  **********************************************************************/
 
-import { e2eContainer } from '../inversify.config';
-import { TYPES, CLASSES } from '../inversify.types';
-import { ILoginPage } from '../pageobjects/login/ILoginPage';
-import { Dashboard } from '../pageobjects/dashboard/Dashboard';
-import { NameGenerator } from '../utils/NameGenerator';
-import { NewWorkspace } from '../pageobjects/dashboard/NewWorkspace';
-import { WorkspaceDetailsPlugins } from '../pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins';
-import { Ide } from '../pageobjects/ide/Ide';
-import { ProjectTree } from '../pageobjects/ide/ProjectTree';
-import { Editor } from '../pageobjects/ide/Editor';
+import { e2eContainer } from '../../inversify.config';
+import { TYPES, CLASSES } from '../../inversify.types';
+import { ILoginPage } from '../../pageobjects/login/ILoginPage';
+import { Dashboard } from '../../pageobjects/dashboard/Dashboard';
+import { NameGenerator } from '../../utils/NameGenerator';
+import { NewWorkspace } from '../../pageobjects/dashboard/NewWorkspace';
+import { WorkspaceDetailsPlugins } from '../../pageobjects/dashboard/workspace-details/WorkspaceDetailsPlugins';
+import { Ide } from '../../pageobjects/ide/Ide';
+import { ProjectTree } from '../../pageobjects/ide/ProjectTree';
+import { Editor } from '../../pageobjects/ide/Editor';
 
 const workspaceName: string = NameGenerator.generate('wksp-test-', 5);
 const namespace: string = 'che';
 const sampleName: string = 'console-java-simple';
-const pluginId: string = 'redhat/java/0.38.0';
-const javaPluginName: string = 'Language Support for Java(TM)';
+const pluginId: string = 'redhat/java/0.45.0';
+const pluginVersion: string = '0.45.0';
+const javaPluginName: string = `Language Support for Java`;
 const fileFolderPath: string = `${sampleName}/src/main/java/org/eclipse/che/examples`;
 const tabTitle: string = 'HelloWorld.java';
 
@@ -53,7 +54,7 @@ suite('E2E', async () => {
         });
 
         test('Add \'Java Language Support\' plugin to workspace', async () => {
-            await workspaceDetailsPlugins.addPluginAndOpenWorkspace(namespace, workspaceName, javaPluginName, pluginId);
+            await workspaceDetailsPlugins.addPluginAndOpenWorkspace(namespace, workspaceName, javaPluginName, pluginId, pluginVersion);
         });
 
     });
