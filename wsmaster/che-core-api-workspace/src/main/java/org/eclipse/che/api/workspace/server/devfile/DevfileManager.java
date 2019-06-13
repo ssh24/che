@@ -28,7 +28,6 @@ import org.eclipse.che.api.core.ServerException;
 import org.eclipse.che.api.core.ValidationException;
 import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
-import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentResolver;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileException;
 import org.eclipse.che.api.workspace.server.devfile.exception.DevfileFormatException;
 import org.eclipse.che.api.workspace.server.devfile.exception.WorkspaceExportException;
@@ -114,13 +113,15 @@ public class DevfileManager {
   }
 
   /**
-   * Resolve devfiles components
+   * Resolve devfile references
    *
-   * @param devfile
+   * @param devfile input devfile
    * @param fileContentProvider
    * @return Devfile object with resolved components
    */
   public DevfileImpl resolve(DevfileImpl devfile, FileContentProvider fileContentProvider) {
+    //TODO resolving
+
     return devfile;
   }
 

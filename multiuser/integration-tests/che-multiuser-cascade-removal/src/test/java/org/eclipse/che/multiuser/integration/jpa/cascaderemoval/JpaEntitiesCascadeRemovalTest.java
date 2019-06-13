@@ -80,7 +80,6 @@ import org.eclipse.che.api.workspace.server.WorkspaceManager;
 import org.eclipse.che.api.workspace.server.WorkspaceSharedPool;
 import org.eclipse.che.api.workspace.server.WorkspaceStatusCache;
 import org.eclipse.che.api.workspace.server.devfile.DevfileModule;
-import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentResolver;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
 import org.eclipse.che.api.workspace.server.model.impl.stack.StackImpl;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
@@ -130,7 +129,6 @@ import org.eclipse.che.multiuser.resource.spi.impl.FreeResourcesLimitImpl;
 import org.eclipse.che.multiuser.resource.spi.impl.ProvidedResourcesImpl;
 import org.eclipse.che.multiuser.resource.spi.impl.ResourceImpl;
 import org.eclipse.che.multiuser.resource.spi.jpa.JpaFreeResourcesLimitDao;
-import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentResolver;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
@@ -265,7 +263,6 @@ public class JpaEntitiesCascadeRemovalTest {
                     .annotatedWith(Names.named("che.auth.reserved_user_names"))
                     .toInstance(new String[0]);
                 bind(RemoveOrganizationOnLastUserRemovedEventSubscriber.class).asEagerSingleton();
-                bind(ComponentResolver.class).to(KubernetesComponentResolver.class);
 
                 Multibinder.newSetBinder(binder(), ResourceLockKeyProvider.class);
                 Multibinder.newSetBinder(binder(), ResourceUsageTracker.class);

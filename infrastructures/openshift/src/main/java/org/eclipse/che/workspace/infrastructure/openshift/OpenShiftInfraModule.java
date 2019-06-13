@@ -26,7 +26,6 @@ import com.google.inject.multibindings.Multibinder;
 import org.eclipse.che.api.system.server.ServiceTermination;
 import org.eclipse.che.api.workspace.server.NoEnvironmentFactory;
 import org.eclipse.che.api.workspace.server.devfile.DevfileBindings;
-import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentResolver;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator.NoopComponentIntegrityValidator;
 import org.eclipse.che.api.workspace.server.spi.RuntimeInfrastructure;
 import org.eclipse.che.api.workspace.server.spi.environment.InternalEnvironmentFactory;
@@ -46,7 +45,6 @@ import org.eclipse.che.workspace.infrastructure.kubernetes.cache.jpa.JpaKubernet
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentProvisioner;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.DockerimageComponentToWorkspaceApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentProvisioner;
-import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentResolver;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentToWorkspaceApplier;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesComponentValidator;
 import org.eclipse.che.workspace.infrastructure.kubernetes.devfile.KubernetesDevfileBindings;
@@ -182,8 +180,6 @@ public class OpenShiftInfraModule extends AbstractModule {
               .addBinding(OPENSHIFT_COMPONENT_TYPE)
               .to(OpenshiftComponentToWorkspaceApplier.class);
         });
-
-    bind(ComponentResolver.class).to(KubernetesComponentResolver.class);
 
     DevfileBindings.addComponentProvisioners(
         binder(), KubernetesComponentProvisioner.class, DockerimageComponentProvisioner.class);

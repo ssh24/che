@@ -38,7 +38,6 @@ import org.eclipse.che.api.workspace.server.devfile.convert.DevfileConverter;
 import org.eclipse.che.api.workspace.server.devfile.convert.ProjectConverter;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentFQNParser;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentProvisioner;
-import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentResolver;
 import org.eclipse.che.api.workspace.server.devfile.convert.component.ComponentToWorkspaceApplier;
 import org.eclipse.che.api.workspace.server.devfile.schema.DevfileSchemaProvider;
 import org.eclipse.che.api.workspace.server.devfile.validator.ComponentIntegrityValidator;
@@ -50,7 +49,6 @@ import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
-import org.testng.annotations.Test;
 
 @Listeners(value = {MockitoTestNGListener.class})
 public class DefaultFactoryParameterResolverTest {
