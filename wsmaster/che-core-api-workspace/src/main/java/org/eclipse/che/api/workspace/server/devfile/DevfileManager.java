@@ -11,8 +11,13 @@
  */
 package org.eclipse.che.api.workspace.server.devfile;
 
+import static com.google.common.base.MoreObjects.firstNonNull;
 import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Strings.isNullOrEmpty;
+import static java.lang.String.format;
 import static java.util.Collections.emptyMap;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.KUBERNETES_COMPONENT_TYPE;
+import static org.eclipse.che.api.workspace.server.devfile.Constants.OPENSHIFT_COMPONENT_TYPE;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -20,6 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.annotations.Beta;
 import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 import org.eclipse.che.api.core.ConflictException;
@@ -35,6 +41,7 @@ import org.eclipse.che.api.workspace.server.devfile.validator.DevfileIntegrityVa
 import org.eclipse.che.api.workspace.server.devfile.validator.DevfileSchemaValidator;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceConfigImpl;
 import org.eclipse.che.api.workspace.server.model.impl.WorkspaceImpl;
+import org.eclipse.che.api.workspace.server.model.impl.devfile.ComponentImpl;
 import org.eclipse.che.api.workspace.server.model.impl.devfile.DevfileImpl;
 import org.eclipse.che.commons.env.EnvironmentContext;
 
@@ -52,22 +59,19 @@ public class DevfileManager {
   private final DevfileIntegrityValidator integrityValidator;
   private final DevfileConverter devfileConverter;
   private final WorkspaceManager workspaceManager;
-  private final ComponentResolver componentResolver;
 
   @Inject
   public DevfileManager(
       DevfileSchemaValidator schemaValidator,
       DevfileIntegrityValidator integrityValidator,
       DevfileConverter devfileConverter,
-      WorkspaceManager workspaceManager,
-      ComponentResolver componentResolver) {
+      WorkspaceManager workspaceManager) {
     this(
         schemaValidator,
         integrityValidator,
         devfileConverter,
         workspaceManager,
-        new ObjectMapper(new YAMLFactory()),
-        componentResolver);
+        new ObjectMapper(new YAMLFactory()));
   }
 
   @VisibleForTesting
@@ -76,14 +80,12 @@ public class DevfileManager {
       DevfileIntegrityValidator integrityValidator,
       DevfileConverter devfileConverter,
       WorkspaceManager workspaceManager,
-      ObjectMapper objectMapper,
-      ComponentResolver componentResolver) {
+      ObjectMapper objectMapper) {
     this.schemaValidator = schemaValidator;
     this.integrityValidator = integrityValidator;
     this.devfileConverter = devfileConverter;
     this.workspaceManager = workspaceManager;
     this.objectMapper = objectMapper;
-    this.componentResolver = componentResolver;
   }
 
   /**
@@ -113,16 +115,29 @@ public class DevfileManager {
   }
 
   /**
-   * Resolve devfile references
+   * Resolve devfile component references into their reference content.
    *
    * @param devfile input devfile
-   * @param fileContentProvider
-   * @return Devfile object with resolved components
+   * @param fileContentProvider provider to fetch reference content
    */
-  public DevfileImpl resolve(DevfileImpl devfile, FileContentProvider fileContentProvider) {
-    //TODO resolving
-
-    return devfile;
+  public void resolveReference(DevfileImpl devfile, FileContentProvider fileContentProvider)
+      throws DevfileException {
+    for (ComponentImpl c : devfile.getComponents()) {
+      if (c.getType().equals(KUBERNETES_COMPONENT_TYPE)
+          || c.getType().equals(OPENSHIFT_COMPONENT_TYPE)) {
+        if (!isNullOrEmpty(c.getReference())) {
+          try {
+            c.setReferenceContent(fileContentProvider.fetchContent(c.getReference()));
+          } catch (IOException e) {
+            throw new DevfileException(
+                format(
+                    "Unable to resolve reference of component: %s",
+                    firstNonNull(c.getAlias(), c.getReference())),
+                e);
+          }
+        }
+      }
+    }
   }
 
   private DevfileImpl parse(String content, ValidationFunction validationFunction)
