@@ -49,6 +49,7 @@ import org.eclipse.che.api.workspace.server.wsplugins.PluginFQNParser;
 import org.mockito.Mock;
 import org.mockito.testng.MockitoTestNGListener;
 import org.testng.annotations.Listeners;
+import org.testng.annotations.Test;
 
 @Listeners(value = {MockitoTestNGListener.class})
 public class DefaultFactoryParameterResolverTest {
@@ -64,11 +65,8 @@ public class DefaultFactoryParameterResolverTest {
           + "  reference: ../localfile\n";
 
   @Mock private URLFetcher urlFetcher;
-  private ComponentFQNParser componentFQNParser = new ComponentFQNParser(new PluginFQNParser());
 
-  @Mock private ComponentResolver componentResolver;
-
-  // TODO fix test
+  @Test
   public void shouldResolveRelativeFiles() throws Exception {
     // given
 
@@ -82,36 +80,12 @@ public class DefaultFactoryParameterResolverTest {
     validators.put(OPENSHIFT_COMPONENT_TYPE, new NoopComponentIntegrityValidator());
 
     DevfileIntegrityValidator integrityValidator = new DevfileIntegrityValidator(validators);
-    Set<ComponentProvisioner> componentProvisioners = new HashSet<>();
-    Map<String, ComponentToWorkspaceApplier> appliers = new HashMap<>();
-    ComponentToWorkspaceApplier applier = mock(ComponentToWorkspaceApplier.class);
-    appliers.put("kubernetes", applier);
 
-    doAnswer(
-            i -> {
-              // in here we mock that the component applier requests the contents of the referenced
-              // local file. That's all we need to happen
-              FileContentProvider p = i.getArgument(2);
-              ComponentImpl component = i.getArgument(1);
-              p.fetchContent(component.getReference());
-              return null;
-            })
-        .when(applier)
-        .apply(any(), any(), any());
-
-    DevfileConverter devfileConverter =
-        new DevfileConverter(
-            new ProjectConverter(),
-            new CommandConverter(),
-            componentProvisioners,
-            appliers,
-            new DefaultEditorProvisioner(null, new String[] {}, componentFQNParser),
-            new URLFetcher());
-
+    DevfileConverter devfileConverter = mock(DevfileConverter.class);
     WorkspaceManager workspaceManager = mock(WorkspaceManager.class);
 
     DevfileManager devfileManager =
-        new DevfileManager(validator, integrityValidator, devfileConverter, workspaceManager, componentResolver);
+        new DevfileManager(validator, integrityValidator, devfileConverter, workspaceManager);
 
     URLFactoryBuilder factoryBuilder =
         new URLFactoryBuilder("editor", "plugin", urlFetcher, devfileManager);
